@@ -107,8 +107,8 @@
 
         .games-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
             margin: 30px 0;
         }
 
@@ -245,6 +245,18 @@
             background: linear-gradient(45deg, #a8edea, #fed6e3);
         }
 
+        .game-card.diary {
+            background: linear-gradient(45deg, #ffecd2, #fcb69f);
+        }
+
+        .game-card.mood {
+            background: linear-gradient(45deg, #fbc2eb, #a6c1ee);
+        }
+
+        .game-card.todo {
+            background: linear-gradient(45deg, #fdcbf1, #e6dee9);
+        }
+
         .coming-soon {
             background: linear-gradient(45deg, #d299c2, #fef9d7);
             opacity: 0.8;
@@ -279,15 +291,27 @@
                 <div class="game-desc">猜猜数字比大小</div>
             </a>
             
-            <div class="game-card coming-soon" onclick="showComingSoon()">
-                <span class="game-emoji">🎲</span>
-                <div class="game-title">更多游戏</div>
-                <div class="game-desc">敬请期待...</div>
-            </div>
+            <a href="cat-diary.html" class="game-card diary" onclick="playClickSound(this)">
+                <span class="game-emoji">📖</span>
+                <div class="game-title">小茂密日记本</div>
+                <div class="game-desc">记录每天的美好时光</div>
+            </a>
+            
+            <a href="mood-tracker.html" class="game-card mood" onclick="playClickSound(this)">
+                <span class="game-emoji">💝</span>
+                <div class="game-title">心情追踪器</div>
+                <div class="game-desc">记录小茂密的心情变化</div>
+            </a>
+            
+            <a href="cat-todo.html" class="game-card todo" onclick="playClickSound(this)">
+                <span class="game-emoji">📝</span>
+                <div class="game-title">待办清单</div>
+                <div class="game-desc">管理小茂密的日常任务</div>
+            </a>
             
             <div class="game-card coming-soon" onclick="showComingSoon()">
-                <span class="game-emoji">🎪</span>
-                <div class="game-title">惊喜游戏</div>
+                <span class="game-emoji">📸</span>
+                <div class="game-title">照片相册</div>
                 <div class="game-desc">正在为小茂密准备中</div>
             </div>
         </div>
@@ -326,7 +350,7 @@
                 z-index: 1000;
                 animation: fadeInOut 2s ease-in-out;
             `;
-            message.textContent = '小茂密正在努力开发新游戏，敬请期待哦~ 🐱';
+            message.textContent = '正在努力为小茂密开发新游戏，敬请期待哦~ 🐱';
             
             // 添加动画样式
             const style = document.createElement('style');

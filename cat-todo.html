@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小茂密的待办清单 📝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1, #ffc0cb, #ffb6c1);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* 猫爪背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 100px 100px, 120px 120px, 80px 80px, 150px 150px, 90px 90px;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffb6c1;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .container::before {
+            content: '🐱';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff6b9d;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #ff8fab;
+            font-size: 14px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .add-todo-section {
+            margin: 20px 0;
+        }
+
+        .todo-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #ffb6c1;
+            border-radius: 15px;
+            padding: 12px 15px;
+            width: 100%;
+            font-size: 16px;
+            color: #ff6b9d;
+            font-family: inherit;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .todo-input:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
+            transform: scale(1.02);
+        }
+
+        .todo-input::placeholder {
+            color: #ffb6c1;
+            opacity: 0.7;
+        }
+
+        .priority-selector {
+            margin: 15px 0;
+        }
+
+        .priority-label {
+            color: #ff6b9d;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .priority-options {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .priority-option {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ffb6c1;
+            border-radius: 20px;
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            color: #ff6b9d;
+            font-weight: bold;
+        }
+
+        .priority-option:hover {
+            transform: scale(1.05);
+        }
+
+        .priority-option.selected {
+            color: white;
+            border-color: transparent;
+        }
+
+        .priority-high.selected {
+            background: #ff6b9d;
+        }
+
+        .priority-medium.selected {
+            background: #ff8fab;
+        }
+
+        .priority-low.selected {
+            background: #ffb6c1;
+        }
+
+        .add-btn {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.3);
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #98fb98, #90ee90);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 14px;
+            color: #2d5016;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(152, 251, 152, 0.3);
+            font-weight: bold;
+            margin: 10px 5px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(152, 251, 152, 0.4);
+        }
+
+        .todo-list {
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .todo-item {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ffb6c1;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+            position: relative;
+            transition: all 0.3s ease;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .todo-item.completed {
+            opacity: 0.6;
+            background: linear-gradient(45deg, #d4edda, #c3e6cb);
+            border-color: #98fb98;
+        }
+
+        .todo-item.completed .todo-text {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .todo-checkbox {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .todo-text {
+            margin-left: 35px;
+            color: #333;
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 8px;
+        }
+
+        .todo-meta {
+            margin-left: 35px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .priority-badge {
+            padding: 3px 8px;
+            border-radius: 10px;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .priority-high {
+            background: #ff6b9d;
+        }
+
+        .priority-medium {
+            background: #ff8fab;
+        }
+
+        .priority-low {
+            background: #ffb6c1;
+        }
+
+        .delete-btn {
+            background: #ff6b9d;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .delete-btn:hover {
+            background: #ff4757;
+            transform: scale(1.1);
+        }
+
+        .stats {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #ffb6c1;
+        }
+
+        .stats-title {
+            color: #ff6b9d;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            border: 1px solid #ffb6c1;
+        }
+
+        .stat-number {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff6b9d;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .no-todos {
+            text-align: center;
+            color: #ff8fab;
+            font-style: italic;
+            margin: 30px 0;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 1.5s linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .clear-btn {
+            background: #ff8fab;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-size: 12px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 139, 171, 0.3);
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .clear-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 139, 171, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 小茂密的待办清单</h1>
+        <div class="subtitle">小狗为小茂密准备的任务管理器~ 让每一天都井井有条</div>
+        
+        <div class="add-todo-section">
+            <input type="text" class="todo-input" id="todoInput" placeholder="小茂密今天要做什么呢？小狗帮你记住~ 🐾" maxlength="100">
+            
+            <div class="priority-selector">
+                <label class="priority-label">重要程度：</label>
+                <div class="priority-options">
+                    <div class="priority-option priority-high" data-priority="high" onclick="selectPriority(this)">🔥 重要</div>
+                    <div class="priority-option priority-medium selected" data-priority="medium" onclick="selectPriority(this)">⭐ 一般</div>
+                    <div class="priority-option priority-low" data-priority="low" onclick="selectPriority(this)">💤 不急</div>
+                </div>
+            </div>
+            
+            <button class="add-btn" onclick="addTodo()">➕ 添加任务</button>
+            <button class="clear-btn" onclick="clearCompleted()">🗑️ 清理完成</button>
+            <button class="back-btn" onclick="goHome()">🏠 回到首页</button>
+        </div>
+        
+        <div class="stats" id="statsSection">
+            <div class="stats-title">📊 小茂密的任务统计</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalTasks">0</div>
+                    <div class="stat-label">总任务</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">待完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completionRate">0%</div>
+                    <div class="stat-label">完成率</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="todo-list" id="todoList">
+            <div class="no-todos" id="noTodos">小茂密还没有任务呢~ 快添加第一个任务吧！🐱</div>
+        </div>
+    </div>
+
+    <script>
+        let selectedPriority = 'medium';
+        let todos = JSON.parse(localStorage.getItem('catTodos')) || [];
+
+        const priorityLabels = {
+            'high': '🔥 重要',
+            'medium': '⭐ 一般', 
+            'low': '💤 不急'
+        };
+
+        function selectPriority(element) {
+            // 移除其他选中状态
+            document.querySelectorAll('.priority-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // 添加选中状态
+            element.classList.add('selected');
+            selectedPriority = element.dataset.priority;
+        }
+
+        function addTodo() {
+            const todoInput = document.getElementById('todoInput');
+            const todoText = todoInput.value.trim();
+            
+            if (!todoText) {
+                showMessage('小茂密，记得写点什么再添加哦~ 🐾');
+                return;
+            }
+            
+            const todo = {
+                id: Date.now(),
+                text: todoText,
+                priority: selectedPriority,
+                completed: false,
+                createdAt: new Date().toLocaleString('zh-CN')
+            };
+            
+            todos.unshift(todo);
+            localStorage.setItem('catTodos', JSON.stringify(todos));
+            
+            todoInput.value = '';
+            renderTodos();
+            updateStats();
+            createSparkles();
+            
+            showMessage(`任务添加成功！小狗帮小茂密记住了这个${priorityLabels[selectedPriority]}任务~ 💖`);
+        }
+
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            const noTodos = document.getElementById('noTodos');
+            
+            if (todos.length === 0) {
+                noTodos.style.display = 'block';
+                return;
+            }
+            
+            noTodos.style.display = 'none';
+            
+            // 按优先级和完成状态排序
+            const sortedTodos = [...todos].sort((a, b) => {
+                if (a.completed !== b.completed) {
+                    return a.completed - b.completed;
+                }
+                const priorityOrder = { 'high': 0, 'medium': 1, 'low': 2 };
+                return priorityOrder[a.priority] - priorityOrder[b.priority];
+            });
+            
+            todoList.innerHTML = '';
+            
+            sortedTodos.forEach(todo => {
+                const todoItem = document.createElement('div');
+                todoItem.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+                todoItem.innerHTML = `
+                    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''} 
+                           onchange="toggleTodo(${todo.id})">
+                    <div class="todo-text">${todo.text}</div>
+                    <div class="todo-meta">
+                        <span>
+                            <span class="priority-badge priority-${todo.priority}">${priorityLabels[todo.priority]}</span>
+                            <span style="margin-left: 10px;">${todo.createdAt}</span>
+                        </span>
+                        <button class="delete-btn" onclick="deleteTodo(${todo.id})" title="删除任务">×</button>
+                    </div>
+                `;
+                todoList.appendChild(todoItem);
+            });
+        }
+
+        function toggleTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+                localStorage.setItem('catTodos', JSON.stringify(todos));
+                renderTodos();
+                updateStats();
+                
+                if (todo.completed) {
+                    createSparkles();
+                    showMessage('任务完成！小茂密真棒~ 小狗为你骄傲！🎉');
+                } else {
+                    showMessage('任务重新激活~ 小茂密加油！💪');
+                }
+            }
+        }
+
+        function deleteTodo(id) {
+            if (confirm('小茂密确定要删除这个任务吗？')) {
+                todos = todos.filter(t => t.id !== id);
+                localStorage.setItem('catTodos', JSON.stringify(todos));
+                renderTodos();
+                updateStats();
+                showMessage('任务已删除~ 小狗帮小茂密整理好了 🗑️');
+            }
+        }
+
+        function clearCompleted() {
+            const completedCount = todos.filter(t => t.completed).length;
+            
+            if (completedCount === 0) {
+                showMessage('没有已完成的任务需要清理哦~ 😊');
+                return;
+            }
+            
+            if (confirm(`小茂密确定要清理${completedCount}个已完成的任务吗？`)) {
+                todos = todos.filter(t => !t.completed);
+                localStorage.setItem('catTodos', JSON.stringify(todos));
+                renderTodos();
+                updateStats();
+                showMessage(`已清理${completedCount}个完成的任务~ 小狗帮小茂密整理好了！✨`);
+            }
+        }
+
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const pending = total - completed;
+            const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            document.getElementById('totalTasks').textContent = total;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = pending;
+            document.getElementById('completionRate').textContent = rate + '%';
+        }
+
+        function showMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(45deg, #ff9a9e, #fecfef);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 14px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+                z-index: 1000;
+                animation: messageSlide 3s ease-in-out;
+            `;
+            messageDiv.textContent = message;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes messageSlide {
+                    0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                    15%, 85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    document.body.removeChild(messageDiv);
+                }
+                if (style.parentNode) {
+                    document.head.removeChild(style);
+                }
+            }, 3000);
+        }
+
+        function createSparkles() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 12; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 1.5 + 's';
+                
+                container.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 1500);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        // 回车键支持
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            renderTodos();
+            updateStats();
+            
+            // 欢迎动画
+            setTimeout(() => {
+                createSparkles();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

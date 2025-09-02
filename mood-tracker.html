@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小茂密的心情追踪器 💝</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1, #ffc0cb, #ffb6c1);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+        }
+
+        /* 猫爪背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 100px 100px, 120px 120px, 80px 80px, 150px 150px, 90px 90px;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffb6c1;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .container::before {
+            content: '🐱';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff6b9d;
+            font-size: 24px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            color: #ff8fab;
+            font-size: 14px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .current-mood {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+        }
+
+        .mood-display {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .mood-text {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .mood-btn {
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #ffb6c1;
+            border-radius: 20px;
+            padding: 20px 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            color: #ff6b9d;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .mood-btn:hover {
+            background: #ffb6c1;
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        .mood-btn.selected {
+            background: #ff6b9d;
+            color: white;
+            border-color: #ff6b9d;
+            transform: scale(1.1);
+        }
+
+        .mood-emoji {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stats-section {
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .stats-title {
+            color: #ff6b9d;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 12px 15px;
+            margin: 10px 0;
+            border: 2px solid #ffb6c1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-emoji {
+            font-size: 20px;
+        }
+
+        .stat-text {
+            color: #ff6b9d;
+            font-weight: bold;
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+
+        .stat-count {
+            background: #ff6b9d;
+            color: white;
+            border-radius: 15px;
+            padding: 5px 12px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .history-section {
+            margin: 25px 0;
+            text-align: left;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #ffb6c1;
+            border-radius: 15px;
+            padding: 12px 15px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .history-mood {
+            font-size: 20px;
+        }
+
+        .history-time {
+            color: #ff8fab;
+            font-size: 12px;
+        }
+
+        .action-buttons {
+            margin: 20px 0;
+        }
+
+        .action-btn {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 14px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.3);
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #98fb98, #90ee90);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 14px;
+            color: #2d5016;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(152, 251, 152, 0.3);
+            font-weight: bold;
+            margin: 5px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(152, 251, 152, 0.4);
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 1.5s linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .no-data {
+            text-align: center;
+            color: #ff8fab;
+            font-style: italic;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💝 小茂密的心情追踪器</h1>
+        <div class="subtitle">小狗想时刻关心小茂密的心情变化~ 记录每一刻的感受</div>
+        
+        <div class="current-mood">
+            <div class="mood-display" id="currentMoodEmoji">😸</div>
+            <div class="mood-text" id="currentMoodText">今天感觉怎么样呢？</div>
+        </div>
+        
+        <div class="mood-grid">
+            <div class="mood-btn" data-mood="😸" data-text="超级开心" onclick="selectMood(this)">
+                <span class="mood-emoji">😸</span>
+                超级开心
+            </div>
+            <div class="mood-btn" data-mood="😺" data-text="很满足" onclick="selectMood(this)">
+                <span class="mood-emoji">😺</span>
+                很满足
+            </div>
+            <div class="mood-btn" data-mood="😊" data-text="心情不错" onclick="selectMood(this)">
+                <span class="mood-emoji">😊</span>
+                心情不错
+            </div>
+            <div class="mood-btn" data-mood="😐" data-text="一般般" onclick="selectMood(this)">
+                <span class="mood-emoji">😐</span>
+                一般般
+            </div>
+            <div class="mood-btn" data-mood="😿" data-text="有点难过" onclick="selectMood(this)">
+                <span class="mood-emoji">😿</span>
+                有点难过
+            </div>
+            <div class="mood-btn" data-mood="😭" data-text="很伤心" onclick="selectMood(this)">
+                <span class="mood-emoji">😭</span>
+                很伤心
+            </div>
+            <div class="mood-btn" data-mood="😴" data-text="想睡觉" onclick="selectMood(this)">
+                <span class="mood-emoji">😴</span>
+                想睡觉
+            </div>
+            <div class="mood-btn" data-mood="🤔" data-text="在思考" onclick="selectMood(this)">
+                <span class="mood-emoji">🤔</span>
+                在思考
+            </div>
+            <div class="mood-btn" data-mood="😋" data-text="想吃东西" onclick="selectMood(this)">
+                <span class="mood-emoji">😋</span>
+                想吃东西
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" onclick="saveMood()">💾 记录心情</button>
+            <button class="action-btn" onclick="clearHistory()">🗑️ 清空记录</button>
+            <button class="back-btn" onclick="goHome()">🏠 回到首页</button>
+        </div>
+        
+        <div class="stats-section">
+            <h3 class="stats-title">📊 小茂密的心情统计</h3>
+            <div id="statsContainer">
+                <div class="no-data">还没有心情记录呢~ 快记录第一个心情吧！</div>
+            </div>
+        </div>
+        
+        <div class="history-section">
+            <h3 class="stats-title">📝 最近的心情记录</h3>
+            <div id="historyContainer">
+                <div class="no-data">暂无历史记录</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedMood = null;
+        let moodHistory = JSON.parse(localStorage.getItem('catMoodHistory')) || [];
+
+        const moodData = {
+            '😸': '超级开心',
+            '😺': '很满足', 
+            '😊': '心情不错',
+            '😐': '一般般',
+            '😿': '有点难过',
+            '😭': '很伤心',
+            '😴': '想睡觉',
+            '🤔': '在思考',
+            '😋': '想吃东西'
+        };
+
+        function selectMood(element) {
+            // 移除其他选中状态
+            document.querySelectorAll('.mood-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 添加选中状态
+            element.classList.add('selected');
+            selectedMood = element.dataset.mood;
+            
+            // 更新当前心情显示
+            document.getElementById('currentMoodEmoji').textContent = selectedMood;
+            document.getElementById('currentMoodText').textContent = element.dataset.text;
+            
+            // 添加动画效果
+            createSparkles();
+        }
+
+        function saveMood() {
+            if (!selectedMood) {
+                showMessage('小茂密，先选择一个心情再记录哦~ 🐾');
+                return;
+            }
+            
+            const moodEntry = {
+                mood: selectedMood,
+                text: moodData[selectedMood],
+                timestamp: Date.now(),
+                date: new Date().toLocaleString('zh-CN')
+            };
+            
+            moodHistory.unshift(moodEntry);
+            
+            // 只保留最近100条记录
+            if (moodHistory.length > 100) {
+                moodHistory = moodHistory.slice(0, 100);
+            }
+            
+            localStorage.setItem('catMoodHistory', JSON.stringify(moodHistory));
+            
+            updateStats();
+            updateHistory();
+            createSparkles();
+            
+            showMessage(`心情记录成功！小狗知道小茂密现在${moodData[selectedMood]}~ 💖`);
+        }
+
+        function updateStats() {
+            const statsContainer = document.getElementById('statsContainer');
+            
+            if (moodHistory.length === 0) {
+                statsContainer.innerHTML = '<div class="no-data">还没有心情记录呢~ 快记录第一个心情吧！</div>';
+                return;
+            }
+            
+            // 统计各种心情的次数
+            const moodCounts = {};
+            moodHistory.forEach(entry => {
+                moodCounts[entry.mood] = (moodCounts[entry.mood] || 0) + 1;
+            });
+            
+            // 按次数排序
+            const sortedMoods = Object.entries(moodCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5); // 只显示前5个
+            
+            statsContainer.innerHTML = '';
+            sortedMoods.forEach(([mood, count]) => {
+                const statItem = document.createElement('div');
+                statItem.className = 'stat-item';
+                statItem.innerHTML = `
+                    <span class="stat-emoji">${mood}</span>
+                    <span class="stat-text">${moodData[mood]}</span>
+                    <span class="stat-count">${count}</span>
+                `;
+                statsContainer.appendChild(statItem);
+            });
+        }
+
+        function updateHistory() {
+            const historyContainer = document.getElementById('historyContainer');
+            
+            if (moodHistory.length === 0) {
+                historyContainer.innerHTML = '<div class="no-data">暂无历史记录</div>';
+                return;
+            }
+            
+            historyContainer.innerHTML = '';
+            
+            // 只显示最近10条记录
+            const recentHistory = moodHistory.slice(0, 10);
+            
+            recentHistory.forEach(entry => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                historyItem.innerHTML = `
+                    <div>
+                        <span class="history-mood">${entry.mood}</span>
+                        <span style="margin-left: 10px; color: #ff6b9d; font-weight: bold;">${entry.text}</span>
+                    </div>
+                    <span class="history-time">${entry.date}</span>
+                `;
+                historyContainer.appendChild(historyItem);
+            });
+        }
+
+        function clearHistory() {
+            if (moodHistory.length === 0) {
+                showMessage('没有记录需要清空哦~ 😊');
+                return;
+            }
+            
+            if (confirm('小茂密确定要清空所有心情记录吗？')) {
+                moodHistory = [];
+                localStorage.setItem('catMoodHistory', JSON.stringify(moodHistory));
+                updateStats();
+                updateHistory();
+                showMessage('心情记录已清空~ 小狗帮小茂密重新开始记录 🗑️');
+            }
+        }
+
+        function showMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(45deg, #ff9a9e, #fecfef);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 25px;
+                font-weight: bold;
+                font-size: 14px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+                z-index: 1000;
+                animation: messageSlide 3s ease-in-out;
+            `;
+            messageDiv.textContent = message;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes messageSlide {
+                    0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                    15%, 85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+                    100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(messageDiv);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    document.body.removeChild(messageDiv);
+                }
+                if (style.parentNode) {
+                    document.head.removeChild(style);
+                }
+            }, 3000);
+        }
+
+        function createSparkles() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 10; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 1.5 + 's';
+                
+                container.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
+                }, 1500);
+            }
+        }
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', () => {
+            updateStats();
+            updateHistory();
+            
+            // 欢迎动画
+            setTimeout(() => {
+                createSparkles();
+            }, 500);
+        });
+    </script>
+</body>
+</html>
