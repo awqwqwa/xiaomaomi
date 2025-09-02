@@ -158,7 +158,6 @@
             margin: 15px 0;
             text-align: left;
             flex: 1;
-            overflow-y: auto;
         }
 
         .stats-title {
@@ -203,7 +202,6 @@
             margin: 15px 0;
             text-align: left;
             flex: 1;
-            overflow-y: auto;
         }
 
         .history-item {
@@ -347,6 +345,13 @@
             <button class="back-btn" onclick="goHome()">🏠 回到首页</button>
         </div>
         
+        <div class="history-section">
+            <h3 class="stats-title">📝 最近的心情记录</h3>
+            <div id="historyContainer">
+                <div class="no-data">暂无历史记录</div>
+            </div>
+        </div>
+
         <div class="stats-section">
             <h3 class="stats-title">📊 小茂密的心情统计</h3>
             <div id="statsContainer">
@@ -354,12 +359,6 @@
             </div>
         </div>
         
-        <div class="history-section">
-            <h3 class="stats-title">📝 最近的心情记录</h3>
-            <div id="historyContainer">
-                <div class="no-data">暂无历史记录</div>
-            </div>
-        </div>
     </div>
 
     <script src="api-client.js"></script>
@@ -425,6 +424,12 @@
         function updateStats() {
             const statsContainer = document.getElementById('statsContainer');
             
+            // 确保DOM元素存在
+            if (!statsContainer) {
+                console.error('找不到统计容器元素');
+                return;
+            }
+            
             if (moodHistory.length === 0) {
                 statsContainer.innerHTML = '<div class="no-data">还没有心情记录呢~ 快记录第一个心情吧！</div>';
                 return;
@@ -447,7 +452,7 @@
                 statItem.className = 'stat-item';
                 statItem.innerHTML = `
                     <span class="stat-emoji">${mood}</span>
-                    <span class="stat-text">${moodData[mood]}</span>
+                    <span class="stat-text">${moodData[mood] || '未知心情'}</span>
                     <span class="stat-count">${count}</span>
                 `;
                 statsContainer.appendChild(statItem);
@@ -456,6 +461,12 @@
 
         function updateHistory() {
             const historyContainer = document.getElementById('historyContainer');
+            
+            // 确保DOM元素存在
+            if (!historyContainer) {
+                console.error('找不到历史记录容器元素');
+                return;
+            }
             
             if (moodHistory.length === 0) {
                 historyContainer.innerHTML = '<div class="no-data">暂无历史记录</div>';

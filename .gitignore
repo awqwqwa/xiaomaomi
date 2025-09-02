@@ -3,7 +3,7 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
+data/
 # 数据文件（可选择性忽略）
 # data/
 

@@ -216,7 +216,6 @@
             margin: 15px 0;
             text-align: left;
             flex: 1;
-            overflow-y: auto;
         }
 
         .todo-item {
@@ -498,8 +497,17 @@
             const todoList = document.getElementById('todoList');
             const noTodos = document.getElementById('noTodos');
             
+            // 确保DOM元素存在
+            if (!todoList || !noTodos) {
+                console.error('找不到必要的DOM元素');
+                return;
+            }
+            
             if (todos.length === 0) {
                 noTodos.style.display = 'block';
+                // 清空现有的待办条目
+                const existingTodos = todoList.querySelectorAll('.todo-item');
+                existingTodos.forEach(todo => todo.remove());
                 return;
             }
             
@@ -514,7 +522,9 @@
                 return priorityOrder[a.priority] - priorityOrder[b.priority];
             });
             
-            todoList.innerHTML = '';
+            // 清空现有的待办条目（保留noTodos）
+            const existingTodos = todoList.querySelectorAll('.todo-item');
+            existingTodos.forEach(todo => todo.remove());
             
             sortedTodos.forEach(todo => {
                 const todoItem = document.createElement('div');

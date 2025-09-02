@@ -187,7 +187,6 @@
             margin-top: 20px;
             text-align: left;
             flex: 1;
-            overflow-y: auto;
         }
 
         .diary-entry {
@@ -224,6 +223,9 @@
             line-height: 1.5;
             font-size: 14px;
             margin-top: 10px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-all;
         }
 
         .no-entries {
@@ -373,6 +375,12 @@
             const entriesContainer = document.getElementById('diaryEntries');
             const noEntries = document.getElementById('noEntries');
             
+            // 确保DOM元素存在
+            if (!entriesContainer || !noEntries) {
+                console.error('找不到必要的DOM元素');
+                return;
+            }
+            
             try {
                 const response = await xiaomaomiAPI.getDiary();
                 
@@ -381,15 +389,17 @@
                     
                     if (diaryEntries.length === 0) {
                         noEntries.style.display = 'block';
+                        // 隐藏其他内容
+                        const existingEntries = entriesContainer.querySelectorAll('.diary-entry');
+                        existingEntries.forEach(entry => entry.remove());
                         return;
                     }
                     
                     noEntries.style.display = 'none';
                     
-                    // 清空现有内容（保留标题）
-                    const title = entriesContainer.querySelector('h3');
-                    entriesContainer.innerHTML = '';
-                    entriesContainer.appendChild(title);
+                    // 清空现有的日记条目（保留标题和noEntries）
+                    const existingEntries = entriesContainer.querySelectorAll('.diary-entry');
+                    existingEntries.forEach(entry => entry.remove());
                     
                     diaryEntries.forEach(entry => {
                         const entryDiv = document.createElement('div');
@@ -404,11 +414,11 @@
                     });
                 } else {
                     console.error('加载日记失败:', response.message);
-                    noEntries.style.display = 'block';
+                    if (noEntries) noEntries.style.display = 'block';
                 }
             } catch (error) {
                 console.error('加载日记失败:', error);
-                noEntries.style.display = 'block';
+                if (noEntries) noEntries.style.display = 'block';
             }
         }
 
