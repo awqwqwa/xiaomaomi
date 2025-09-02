@@ -443,9 +443,10 @@
         </div>
     </div>
 
+    <script src="api-client.js"></script>
     <script>
         let selectedPriority = 'medium';
-        let todos = JSON.parse(localStorage.getItem('catTodos')) || [];
+        let todos = [];
 
         const priorityLabels = {
             'high': '🔥 重要',
@@ -464,7 +465,7 @@
             selectedPriority = element.dataset.priority;
         }
 
-        function addTodo() {
+        async function addTodo() {
             const todoInput = document.getElementById('todoInput');
             const todoText = todoInput.value.trim();
             
@@ -473,23 +474,24 @@
                 return;
             }
             
-            const todo = {
-                id: Date.now(),
-                text: todoText,
-                priority: selectedPriority,
-                completed: false,
-                createdAt: new Date().toLocaleString('zh-CN')
-            };
-            
-            todos.unshift(todo);
-            localStorage.setItem('catTodos', JSON.stringify(todos));
-            
-            todoInput.value = '';
-            renderTodos();
-            updateStats();
-            createSparkles();
-            
-            showMessage(`任务添加成功！小狗帮小茂密记住了这个${priorityLabels[selectedPriority]}任务~ 💖`);
+            try {
+                const response = await xiaomaomiAPI.addTodo(todoText, selectedPriority);
+                
+                if (response.success) {
+                    todoInput.value = '';
+                    await loadTodos();
+                    renderTodos();
+                    updateStats();
+                    createSparkles();
+                    
+                    showMessage(response.message || `任务添加成功！小狗帮小茂密记住了这个${priorityLabels[selectedPriority]}任务~ 💖`);
+                } else {
+                    showMessage(response.message || '添加任务时遇到了问题 😿');
+                }
+            } catch (error) {
+                console.error('添加任务失败:', error);
+                showMessage('小狗暂时无法添加任务，请稍后再试~ 😿');
+            }
         }
 
         function renderTodos() {
@@ -533,34 +535,54 @@
             });
         }
 
-        function toggleTodo(id) {
+        async function toggleTodo(id) {
             const todo = todos.find(t => t.id === id);
             if (todo) {
-                todo.completed = !todo.completed;
-                localStorage.setItem('catTodos', JSON.stringify(todos));
-                renderTodos();
-                updateStats();
-                
-                if (todo.completed) {
-                    createSparkles();
-                    showMessage('任务完成！小茂密真棒~ 小狗为你骄傲！🎉');
-                } else {
-                    showMessage('任务重新激活~ 小茂密加油！💪');
+                try {
+                    const response = await xiaomaomiAPI.updateTodo(id, { completed: !todo.completed });
+                    
+                    if (response.success) {
+                        await loadTodos();
+                        renderTodos();
+                        updateStats();
+                        
+                        if (!todo.completed) {
+                            createSparkles();
+                            showMessage('任务完成！小茂密真棒~ 小狗为你骄傲！🎉');
+                        } else {
+                            showMessage('任务重新激活~ 小茂密加油！💪');
+                        }
+                    } else {
+                        showMessage(response.message || '更新任务时遇到了问题 😿');
+                    }
+                } catch (error) {
+                    console.error('更新任务失败:', error);
+                    showMessage('小狗暂时无法更新任务，请稍后再试~ 😿');
                 }
             }
         }
 
-        function deleteTodo(id) {
+        async function deleteTodo(id) {
             if (confirm('小茂密确定要删除这个任务吗？')) {
-                todos = todos.filter(t => t.id !== id);
-                localStorage.setItem('catTodos', JSON.stringify(todos));
-                renderTodos();
-                updateStats();
-                showMessage('任务已删除~ 小狗帮小茂密整理好了 🗑️');
+                try {
+                    const response = await xiaomaomiAPI.deleteTodo(id);
+                    
+                    if (response.success) {
+                        await loadTodos();
+                        renderTodos();
+                        updateStats();
+                        showMessage(response.message || '任务已删除~ 小狗帮小茂密整理好了 🗑️');
+                    } else {
+                        showMessage(response.message || '删除任务时遇到了问题 😿');
+                    }
+                } catch (error) {
+                    console.error('删除任务失败:', error);
+                    showMessage('小狗暂时无法删除任务，请稍后再试~ 😿');
+                }
             }
         }
 
-        function clearCompleted() {
+        async function clearCompleted() {
             const completedCount = todos.filter(t => t.completed).length;
             
             if (completedCount === 0) {
@@ -569,11 +591,37 @@
             }
             
             if (confirm(`小茂密确定要清理${completedCount}个已完成的任务吗？`)) {
-                todos = todos.filter(t => !t.completed);
-                localStorage.setItem('catTodos', JSON.stringify(todos));
-                renderTodos();
-                updateStats();
-                showMessage(`已清理${completedCount}个完成的任务~ 小狗帮小茂密整理好了！✨`);
+                try {
+                    const response = await xiaomaomiAPI.clearCompletedTodos();
+                    
+                    if (response.success) {
+                        await loadTodos();
+                        renderTodos();
+                        updateStats();
+                        showMessage(response.message || `已清理${completedCount}个完成的任务~ 小狗帮小茂密整理好了！✨`);
+                    } else {
+                        showMessage(response.message || '清理任务时遇到了问题 😿');
+                    }
+                } catch (error) {
+                    console.error('清理任务失败:', error);
+                    showMessage('小狗暂时无法清理任务，请稍后再试~ 😿');
+                }
+            }
+        }
+
+        async function loadTodos() {
+            try {
+                const response = await xiaomaomiAPI.getTodos();
+                
+                if (response.success) {
+                    todos = response.data || [];
+                } else {
+                    console.error('加载任务失败:', response.message);
+                    todos = [];
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+                todos = [];
             }
         }
 
@@ -662,7 +710,8 @@
         });
 
         // 页面加载时初始化
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            await loadTodos();
             renderTodos();
             updateStats();
             

@@ -362,9 +362,10 @@
         </div>
     </div>
 
+    <script src="api-client.js"></script>
     <script>
         let selectedMood = null;
-        let moodHistory = JSON.parse(localStorage.getItem('catMoodHistory')) || [];
+        let moodHistory = [];
 
         const moodData = {
             '😸': '超级开心',
@@ -396,33 +397,29 @@
             createSparkles();
         }
 
-        function saveMood() {
+        async function saveMood() {
             if (!selectedMood) {
                 showMessage('小茂密，先选择一个心情再记录哦~ 🐾');
                 return;
             }
             
-            const moodEntry = {
-                mood: selectedMood,
-                text: moodData[selectedMood],
-                timestamp: Date.now(),
-                date: new Date().toLocaleString('zh-CN')
-            };
-            
-            moodHistory.unshift(moodEntry);
-            
-            // 只保留最近100条记录
-            if (moodHistory.length > 100) {
-                moodHistory = moodHistory.slice(0, 100);
+            try {
+                const response = await xiaomaomiAPI.addMood(selectedMood, moodData[selectedMood]);
+                
+                if (response.success) {
+                    await loadMoodData();
+                    updateStats();
+                    updateHistory();
+                    createSparkles();
+                    
+                    showMessage(response.message || `心情记录成功！小狗知道小茂密现在${moodData[selectedMood]}~ 💖`);
+                } else {
+                    showMessage(response.message || '记录心情时遇到了问题 😿');
+                }
+            } catch (error) {
+                console.error('记录心情失败:', error);
+                showMessage('小狗暂时无法记录心情，请稍后再试~ 😿');
             }
-            
-            localStorage.setItem('catMoodHistory', JSON.stringify(moodHistory));
-            
-            updateStats();
-            updateHistory();
-            createSparkles();
-            
-            showMessage(`心情记录成功！小狗知道小茂密现在${moodData[selectedMood]}~ 💖`);
         }
 
         function updateStats() {
@@ -484,18 +481,44 @@
             });
         }
 
-        function clearHistory() {
+        async function clearHistory() {
             if (moodHistory.length === 0) {
                 showMessage('没有记录需要清空哦~ 😊');
                 return;
             }
             
             if (confirm('小茂密确定要清空所有心情记录吗？')) {
+                try {
+                    const response = await xiaomaomiAPI.clearMood();
+                    
+                    if (response.success) {
+                        await loadMoodData();
+                        updateStats();
+                        updateHistory();
+                        showMessage(response.message || '心情记录已清空~ 小狗帮小茂密重新开始记录 🗑️');
+                    } else {
+                        showMessage(response.message || '清空记录时遇到了问题 😿');
+                    }
+                } catch (error) {
+                    console.error('清空记录失败:', error);
+                    showMessage('小狗暂时无法清空记录，请稍后再试~ 😿');
+                }
+            }
+        }
+
+        async function loadMoodData() {
+            try {
+                const response = await xiaomaomiAPI.getMood();
+                
+                if (response.success) {
+                    moodHistory = response.data || [];
+                } else {
+                    console.error('加载心情数据失败:', response.message);
+                    moodHistory = [];
+                }
+            } catch (error) {
+                console.error('加载心情数据失败:', error);
                 moodHistory = [];
-                localStorage.setItem('catMoodHistory', JSON.stringify(moodHistory));
-                updateStats();
-                updateHistory();
-                showMessage('心情记录已清空~ 小狗帮小茂密重新开始记录 🗑️');
             }
         }
 
@@ -565,7 +588,8 @@
         }
 
         // 页面加载时初始化
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
+            await loadMoodData();
             updateStats();
             updateHistory();
             

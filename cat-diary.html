@@ -316,9 +316,10 @@
         </div>
     </div>
 
+    <script src="api-client.js"></script>
     <script>
         let selectedMood = '😸';
-        let diaryEntries = JSON.parse(localStorage.getItem('catDiary')) || [];
+        let diaryEntries = [];
 
         function selectMood(element) {
             // 移除其他选中状态
@@ -337,7 +338,7 @@
             }, 200);
         }
 
-        function saveDiary() {
+        async function saveDiary() {
             const diaryText = document.getElementById('diaryText').value.trim();
             
             if (!diaryText) {
@@ -345,63 +346,87 @@
                 return;
             }
             
-            const entry = {
-                id: Date.now(),
-                date: new Date().toLocaleString('zh-CN'),
-                mood: selectedMood,
-                content: diaryText
-            };
-            
-            diaryEntries.unshift(entry);
-            localStorage.setItem('catDiary', JSON.stringify(diaryEntries));
-            
-            // 清空输入
-            document.getElementById('diaryText').value = '';
-            
-            // 重新加载日记列表
-            loadDiaryEntries();
-            
-            // 创建闪烁效果
-            createSparkles();
-            
-            showMessage('日记保存成功！小狗帮小茂密记住了这美好的一天~ 💖');
+            try {
+                const response = await xiaomaomiAPI.addDiary(selectedMood, diaryText);
+                
+                if (response.success) {
+                    // 清空输入
+                    document.getElementById('diaryText').value = '';
+                    
+                    // 重新加载日记列表
+                    await loadDiaryEntries();
+                    
+                    // 创建闪烁效果
+                    createSparkles();
+                    
+                    showMessage(response.message || '日记保存成功！小狗帮小茂密记住了这美好的一天~ 💖');
+                } else {
+                    showMessage(response.message || '保存日记时遇到了问题 😿');
+                }
+            } catch (error) {
+                console.error('保存日记失败:', error);
+                showMessage('小狗暂时无法保存日记，请稍后再试~ 😿');
+            }
         }
 
-        function loadDiaryEntries() {
+        async function loadDiaryEntries() {
             const entriesContainer = document.getElementById('diaryEntries');
             const noEntries = document.getElementById('noEntries');
             
-            if (diaryEntries.length === 0) {
+            try {
+                const response = await xiaomaomiAPI.getDiary();
+                
+                if (response.success) {
+                    diaryEntries = response.data || [];
+                    
+                    if (diaryEntries.length === 0) {
+                        noEntries.style.display = 'block';
+                        return;
+                    }
+                    
+                    noEntries.style.display = 'none';
+                    
+                    // 清空现有内容（保留标题）
+                    const title = entriesContainer.querySelector('h3');
+                    entriesContainer.innerHTML = '';
+                    entriesContainer.appendChild(title);
+                    
+                    diaryEntries.forEach(entry => {
+                        const entryDiv = document.createElement('div');
+                        entryDiv.className = 'diary-entry';
+                        entryDiv.innerHTML = `
+                            <div class="entry-date">${entry.date}</div>
+                            <div class="entry-mood">${entry.mood}</div>
+                            <button class="delete-btn" onclick="deleteDiary(${entry.id})" title="删除这篇日记">×</button>
+                            <div class="entry-content">${entry.content}</div>
+                        `;
+                        entriesContainer.appendChild(entryDiv);
+                    });
+                } else {
+                    console.error('加载日记失败:', response.message);
+                    noEntries.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('加载日记失败:', error);
                 noEntries.style.display = 'block';
-                return;
             }
-            
-            noEntries.style.display = 'none';
-            
-            // 清空现有内容（保留标题）
-            const title = entriesContainer.querySelector('h3');
-            entriesContainer.innerHTML = '';
-            entriesContainer.appendChild(title);
-            
-            diaryEntries.forEach(entry => {
-                const entryDiv = document.createElement('div');
-                entryDiv.className = 'diary-entry';
-                entryDiv.innerHTML = `
-                    <div class="entry-date">${entry.date}</div>
-                    <div class="entry-mood">${entry.mood}</div>
-                    <button class="delete-btn" onclick="deleteDiary(${entry.id})" title="删除这篇日记">×</button>
-                    <div class="entry-content">${entry.content}</div>
-                `;
-                entriesContainer.appendChild(entryDiv);
-            });
         }
 
-        function deleteDiary(id) {
+        async function deleteDiary(id) {
             if (confirm('小茂密确定要删除这篇日记吗？')) {
-                diaryEntries = diaryEntries.filter(entry => entry.id !== id);
-                localStorage.setItem('catDiary', JSON.stringify(diaryEntries));
-                loadDiaryEntries();
-                showMessage('日记已删除~ 小狗帮小茂密整理好了 🗑️');
+                try {
+                    const response = await xiaomaomiAPI.deleteDiary(id);
+                    
+                    if (response.success) {
+                        await loadDiaryEntries();
+                        showMessage(response.message || '日记已删除~ 小狗帮小茂密整理好了 🗑️');
+                    } else {
+                        showMessage(response.message || '删除日记时遇到了问题 😿');
+                    }
+                } catch (error) {
+                    console.error('删除日记失败:', error);
+                    showMessage('小狗暂时无法删除日记，请稍后再试~ 😿');
+                }
             }
         }
 
@@ -471,12 +496,12 @@
         }
 
         // 页面加载时初始化
-        window.addEventListener('load', () => {
+        window.addEventListener('load', async () => {
             // 默认选择开心心情
             document.querySelector('.mood-option[data-mood="😸"]').classList.add('selected');
             
             // 加载已有日记
-            loadDiaryEntries();
+            await loadDiaryEntries();
             
             // 欢迎动画
             setTimeout(() => {
