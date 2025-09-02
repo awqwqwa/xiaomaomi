@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今天吃什么？🍽️</title>
+    <title>小茂密的游戏世界 🎮</title>
     <style>
         * {
             margin: 0;
@@ -50,10 +50,10 @@
         .container {
             background: rgba(255, 255, 255, 0.9);
             border-radius: 25px;
-            padding: 30px;
+            padding: 40px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             text-align: center;
-            max-width: 350px;
+            max-width: 500px;
             width: 90%;
             position: relative;
             backdrop-filter: blur(10px);
@@ -75,63 +75,74 @@
 
         h1 {
             color: #ff6b9d;
-            font-size: 24px;
-            margin-bottom: 20px;
+            font-size: 28px;
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .result {
+        .subtitle {
+            color: #ff8fab;
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.8;
+        }
+
+        .welcome-message {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            color: #ff6b9d;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2);
+            border: 2px solid #ffb6c1;
+            animation: welcomeGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes welcomeGlow {
+            from { box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2); }
+            to { box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4); }
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .game-card {
             background: linear-gradient(45deg, #ff9a9e, #fecfef);
             border-radius: 20px;
-            padding: 25px;
-            margin: 20px 0;
-            font-size: 28px;
-            font-weight: bold;
+            padding: 25px 20px;
             color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 16px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
             transition: all 0.3s ease;
-        }
-
-        .result.hidden {
-            opacity: 0;
-            transform: scale(0.8);
-        }
-
-        .result.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .generate-btn {
-            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
-            border: none;
-            border-radius: 50px;
-            padding: 15px 30px;
-            font-size: 18px;
-            color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
-            font-weight: bold;
             position: relative;
             overflow: hidden;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .generate-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
+        .game-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 107, 157, 0.4);
         }
 
-        .generate-btn:active {
-            transform: translateY(0);
+        .game-card:active {
+            transform: translateY(-2px) scale(1.01);
         }
 
-        .generate-btn::before {
+        .game-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -142,15 +153,25 @@
             transition: left 0.5s;
         }
 
-        .generate-btn:hover::before {
+        .game-card:hover::before {
             left: 100%;
         }
 
-        .food-list {
-            margin-top: 20px;
+        .game-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .game-title {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .game-desc {
             font-size: 12px;
-            color: #888;
-            line-height: 1.5;
+            opacity: 0.9;
+            line-height: 1.3;
         }
 
         .sparkle {
@@ -178,112 +199,160 @@
             80% { transform: translateY(-5px); }
         }
 
-        .emoji {
-            font-size: 32px;
-            margin-bottom: 10px;
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #ff8fab;
+            opacity: 0.7;
         }
 
-        .time-hint {
-            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
-            border-radius: 15px;
-            padding: 12px 20px;
-            margin: 15px 0;
-            font-size: 16px;
-            color: #ff6b9d;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2);
-            border: 2px solid #ffb6c1;
-            animation: timeHintGlow 2s ease-in-out infinite alternate;
+        /* 响应式设计 */
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .game-card {
+                min-height: 100px;
+                padding: 20px 15px;
+            }
         }
 
-        @keyframes timeHintGlow {
-            from { box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2); }
-            to { box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4); }
+        /* 特殊动画效果 */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
         }
 
-        #timeText {
-            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: bold;
-            text-shadow: none;
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .game-card.food {
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+        }
+
+        .game-card.number {
+            background: linear-gradient(45deg, #a8edea, #fed6e3);
+        }
+
+        .coming-soon {
+            background: linear-gradient(45deg, #d299c2, #fef9d7);
+            opacity: 0.8;
+            cursor: not-allowed;
+        }
+
+        .coming-soon:hover {
+            transform: none;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
         }
     </style>
 </head>
 <body>
-            <div class="container">
-            <div class="emoji">🍽️</div>
-            <h1>今天吃什么？</h1>
+    <div class="container">
+        <h1 class="floating">小茂密的专属世界</h1>
+        <div class="subtitle">欢迎来到可爱的小茂密天地~ 🎮</div>
+        
+        <div class="welcome-message">
+            小狗为你准备了好玩的小东西，快来选择一个开始吧喵喵喵 🐾
+        </div>
+        
+        <div class="games-grid">
+            <a href="food-selector.html" class="game-card food" onclick="playClickSound(this)">
+                <span class="game-emoji">🍽️</span>
+                <div class="game-title">今天吃什么</div>
+                <div class="game-desc">让小茂密选择美味的食物</div>
+            </a>
             
-            <div class="time-hint" id="timeHint">
-                <span id="timeText">该吃饭啦</span>
+            <a href="guess-number-game.html" class="game-card number" onclick="playClickSound(this)">
+                <span class="game-emoji">🎯</span>
+                <div class="game-title">猜数字游戏</div>
+                <div class="game-desc">猜猜数字比大小</div>
+            </a>
+            
+            <div class="game-card coming-soon" onclick="showComingSoon()">
+                <span class="game-emoji">🎲</span>
+                <div class="game-title">更多游戏</div>
+                <div class="game-desc">敬请期待...</div>
             </div>
             
-            <div class="result hidden" id="result">
-                今天要吃什么呢~~~
-            </div>
-            
-            <button class="generate-btn" onclick="generateFood()">
-              🐶不许吃小狗
-            </button>
-            
-            <div class="food-list">
-                可选美食：混沌、拌饭、大米套餐、灌汤包、饺子、麻辣烫、小火锅、鸡腿饭、鸭腿饭、冒烤鸭、口水鸡、倔强面、砂锅烩饼、羊肉烩面
+            <div class="game-card coming-soon" onclick="showComingSoon()">
+                <span class="game-emoji">🎪</span>
+                <div class="game-title">惊喜游戏</div>
+                <div class="game-desc">正在为小茂密准备中</div>
             </div>
         </div>
+        
+        <div class="footer">
+            Made for 💖 小茂密 | 选择你喜欢的游戏开始玩耍吧！
+        </div>
+    </div>
 
     <script>
-        const foods = [
-            '混沌 🥟',
-            '拌饭 🍚',
-            '大米套餐 🍱',
-            '灌汤包 🥟',
-            '饺子 🥟',
-            '麻辣烫 🌶️',
-            '小火锅 🍲',
-            '鸡腿饭 🍗',
-            '鸭腿饭 🦆',
-            '冒烤鸭 🦆',
-            '口水鸡 🐔',
-            '倔强面 🍜',
-            '砂锅烩饼 🍲',
-            '羊肉烩面 🍜'
-        ];
-
-        function generateFood() {
-            const result = document.getElementById('result');
-            const btn = document.querySelector('.generate-btn');
-            
-            // 添加按钮动画
-            btn.classList.add('bounce');
-            setTimeout(() => btn.classList.remove('bounce'), 600);
-            
-            // 隐藏结果
-            result.classList.add('hidden');
-            result.classList.remove('show');
+        function playClickSound(element) {
+            // 添加点击动画
+            element.classList.add('bounce');
+            setTimeout(() => element.classList.remove('bounce'), 600);
             
             // 创建闪烁效果
             createSparkles();
+        }
+
+        function showComingSoon() {
+            // 创建临时提示
+            const message = document.createElement('div');
+            message.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(45deg, #ff9a9e, #fecfef);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 15px;
+                font-weight: bold;
+                font-size: 16px;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+                box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4);
+                z-index: 1000;
+                animation: fadeInOut 2s ease-in-out;
+            `;
+            message.textContent = '小茂密正在努力开发新游戏，敬请期待哦~ 🐱';
             
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(message);
+            
+            // 2秒后移除
             setTimeout(() => {
-                // 随机选择食物
-                const randomFood = foods[Math.floor(Math.random() * foods.length)];
-                result.textContent = randomFood;
-                
-                // 显示结果
-                result.classList.remove('hidden');
-                result.classList.add('show');
-                result.classList.add('bounce');
-                
-                setTimeout(() => result.classList.remove('bounce'), 600);
-            }, 500);
+                document.body.removeChild(message);
+                document.head.removeChild(style);
+            }, 2000);
+            
+            createSparkles();
         }
 
         function createSparkles() {
             const container = document.querySelector('.container');
             
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 const sparkle = document.createElement('div');
                 sparkle.className = 'sparkle';
                 sparkle.style.left = Math.random() * 100 + '%';
@@ -293,35 +362,39 @@
                 container.appendChild(sparkle);
                 
                 setTimeout(() => {
-                    sparkle.remove();
+                    if (sparkle.parentNode) {
+                        sparkle.remove();
+                    }
                 }, 1500);
             }
         }
 
-        // 获取当前时间并更新提示
-        function updateTimeHint() {
-            const now = new Date();
-            const hour = now.getHours();
-            const timeText = document.getElementById('timeText');
-            
-            if (hour >= 6 && hour < 9) {
-                timeText.textContent = '小茂密早饭不在这里吃哦';
-            } else if (hour >= 9 && hour < 14) {
-                timeText.textContent = '小茂密该吃午饭啦';
-            } else {
-                timeText.textContent = '想想晚上吃什么吧，喵喵喵~';
-            }
-        }
-
-        // 页面加载时的动画
+        // 页面加载动画
         window.addEventListener('load', () => {
-            updateTimeHint();
-            const result = document.getElementById('result');
+            const gameCards = document.querySelectorAll('.game-card');
+            gameCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 + index * 100);
+            });
+            
+            // 欢迎闪烁效果
             setTimeout(() => {
-                result.classList.remove('hidden');
-                result.classList.add('show');
-            }, 500);
+                createSparkles();
+            }, 1000);
         });
+
+        // 随机背景动画
+        setInterval(() => {
+            if (Math.random() < 0.3) {
+                createSparkles();
+            }
+        }, 5000);
     </script>
 </body>
 </html>

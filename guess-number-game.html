@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜数字游戏 🎯</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1, #ffc0cb, #ffb6c1);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 猫爪背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 100px 100px, 120px 120px, 80px 80px, 150px 150px, 90px 90px;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffb6c1;
+        }
+
+        .container::before {
+            content: '🐱';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff6b9d;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .game-info {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin: 15px 0;
+            font-size: 16px;
+            color: #ff6b9d;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2);
+            border: 2px solid #ffb6c1;
+            animation: infoGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes infoGlow {
+            from { box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2); }
+            to { box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4); }
+        }
+
+        .target-number {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .input-section {
+            margin: 20px 0;
+        }
+
+        .number-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 3px solid #ffb6c1;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 24px;
+            text-align: center;
+            width: 150px;
+            margin: 10px;
+            color: #ff6b9d;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .number-input:focus {
+            outline: none;
+            border-color: #ff6b9d;
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
+            transform: scale(1.05);
+        }
+
+        .guess-btn {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+            margin: 10px;
+        }
+
+        .guess-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .guess-btn:active {
+            transform: translateY(0);
+        }
+
+        .guess-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .guess-btn:hover::before {
+            left: 100%;
+        }
+
+        .result-message {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            transition: all 0.3s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .result-message.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 1.5s linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .bounce {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .emoji {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .score {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 14px;
+            color: #ff6b9d;
+            font-weight: bold;
+            display: inline-block;
+            border: 2px solid #ffb6c1;
+        }
+
+        .new-game-btn {
+            background: linear-gradient(45deg, #98fb98, #90ee90);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #2d5016;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 20px rgba(152, 251, 152, 0.3);
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(152, 251, 152, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">🎯</div>
+        <h1>猜数字游戏</h1>
+        
+        <div class="game-info">
+            我想了一个 <span id="rangeText">1-100</span> 的数字，你能猜到吗？
+        </div>
+        
+        <div class="target-number" id="targetDisplay">
+            🤔
+        </div>
+        
+        <div class="input-section">
+            <input type="number" class="number-input" id="guessInput" placeholder="?" min="1" max="100">
+            <br>
+            <button class="guess-btn" onclick="makeGuess()">🎯 猜一猜</button>
+            <button class="new-game-btn" onclick="newGame()">🎮 新游戏</button>
+        </div>
+        
+        <div class="result-message" id="resultMessage">
+            开始猜数字吧！
+        </div>
+        
+        <div class="score">
+            <span>尝试次数: <span id="attempts">0</span></span> | 
+            <span>最佳记录: <span id="bestScore">-</span></span>
+        </div>
+    </div>
+
+    <script>
+        let targetNumber = 0;
+        let attempts = 0;
+        let gameWon = false;
+        let bestScore = localStorage.getItem('bestScore') || null;
+
+        // 随机提示语句
+        const tooHighMessages = [
+            "太大啦！小茂密说要小一点~ 🐱",
+            "哎呀，大了大了！再小一点点嘛~ 😸",
+            "喵喵喵，数字太大了呢~ 🙀",
+            "小茂密摇摇头，太大了哦~ 😺",
+            "大了呢，再往小里猜猜看~ 🐾",
+            "哇，这个数字有点大诶~ 😹",
+            "小茂密提醒：要更小的数字哦~ 🐱‍⭐",
+            "太高了太高了，降低一点点~ 😽"
+        ];
+
+        const tooLowMessages = [
+            "太小啦！小茂密说要大一点~ 🐱",
+            "哎呀，小了小了！再大一点点嘛~ 😸",
+            "喵喵喵，数字太小了呢~ 🙀",
+            "小茂密摇摇头，太小了哦~ 😺",
+            "小了呢，再往大里猜猜看~ 🐾",
+            "哇，这个数字有点小诶~ 😹",
+            "小茂密提醒：要更大的数字哦~ 🐱‍⭐",
+            "太低了太低了，提高一点点~ 😽"
+        ];
+
+        const correctMessages = [
+            "🎉 恭喜恭喜！小茂密为你鼓掌~ 👏",
+            "🎊 太棒了！你猜对了！小茂密很开心~ 😻",
+            "✨ 哇！完全正确！小茂密给你点赞~ 👍",
+            "🌟 厉害厉害！小茂密佩服你~ 😸",
+            "🎈 答对啦！小茂密要给你奖励小鱼干~ 🐟",
+            "🎁 太聪明了！小茂密竖起大拇指~ 👍",
+            "🏆 完美！小茂密认为你是猜数字高手~ 😺",
+            "💖 猜对了！小茂密的心都要融化了~ 😽"
+        ];
+
+        function initGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            gameWon = false;
+            updateDisplay();
+            document.getElementById('guessInput').value = '';
+            document.getElementById('resultMessage').textContent = '开始猜数字吧！';
+            document.getElementById('resultMessage').classList.remove('show');
+            
+            if (bestScore) {
+                document.getElementById('bestScore').textContent = bestScore;
+            }
+        }
+
+        function updateDisplay() {
+            document.getElementById('attempts').textContent = attempts;
+        }
+
+        function makeGuess() {
+            if (gameWon) return;
+            
+            const guessInput = document.getElementById('guessInput');
+            const guess = parseInt(guessInput.value);
+            const resultMessage = document.getElementById('resultMessage');
+            const targetDisplay = document.getElementById('targetDisplay');
+            
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                showMessage("请输入1-100之间的数字哦~ 😊");
+                return;
+            }
+            
+            attempts++;
+            updateDisplay();
+            
+            // 添加按钮动画
+            const btn = document.querySelector('.guess-btn');
+            btn.classList.add('bounce');
+            setTimeout(() => btn.classList.remove('bounce'), 600);
+            
+            // 创建闪烁效果
+            createSparkles();
+            
+            let message = '';
+            
+            if (guess === targetNumber) {
+                // 猜对了
+                message = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+                targetDisplay.textContent = targetNumber;
+                targetDisplay.classList.add('bounce');
+                gameWon = true;
+                
+                // 更新最佳记录
+                if (!bestScore || attempts < bestScore) {
+                    bestScore = attempts;
+                    localStorage.setItem('bestScore', bestScore);
+                    document.getElementById('bestScore').textContent = bestScore;
+                    message += ` 🏆 新记录！`;
+                }
+                
+                setTimeout(() => targetDisplay.classList.remove('bounce'), 600);
+            } else if (guess > targetNumber) {
+                // 太大了
+                message = tooHighMessages[Math.floor(Math.random() * tooHighMessages.length)];
+            } else {
+                // 太小了
+                message = tooLowMessages[Math.floor(Math.random() * tooLowMessages.length)];
+            }
+            
+            showMessage(message);
+            guessInput.value = '';
+        }
+
+        function showMessage(message) {
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.classList.remove('show');
+            
+            setTimeout(() => {
+                resultMessage.textContent = message;
+                resultMessage.classList.add('show');
+                resultMessage.classList.add('bounce');
+                setTimeout(() => resultMessage.classList.remove('bounce'), 600);
+            }, 200);
+        }
+
+        function newGame() {
+            initGame();
+            createSparkles();
+            showMessage("新游戏开始啦！小茂密又想了一个新数字~ 🎮");
+        }
+
+        function createSparkles() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 10; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 1.5 + 's';
+                
+                container.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 1500);
+            }
+        }
+
+        // 回车键支持
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeGuess();
+            }
+        });
+
+        // 页面加载时初始化游戏
+        window.addEventListener('load', () => {
+            initGame();
+            setTimeout(() => {
+                document.getElementById('resultMessage').classList.add('show');
+            }, 500);
+        });
+    </script>
+</body>
+</html>

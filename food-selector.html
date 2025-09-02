@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什么？🍽️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #ffb6c1, #ffc0cb, #ffb6c1);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 猫爪背景 */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 80% 40%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 70% 80%, rgba(255, 255, 255, 0.1) 2px, transparent 2px),
+                radial-gradient(circle at 10% 90%, rgba(255, 255, 255, 0.1) 2px, transparent 2px);
+            background-size: 100px 100px, 120px 120px, 80px 80px, 150px 150px, 90px 90px;
+            pointer-events: none;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            position: relative;
+            backdrop-filter: blur(10px);
+            border: 3px solid #ffb6c1;
+        }
+
+        .container::before {
+            content: '🐱';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 30px;
+            background: white;
+            border-radius: 50%;
+            padding: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff6b9d;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result {
+            background: linear-gradient(45deg, #ff9a9e, #fecfef);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 20px 0;
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .result.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .result.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.3);
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(255, 107, 157, 0.4);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .generate-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .generate-btn:hover::before {
+            left: 100%;
+        }
+
+        .food-list {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: white;
+            border-radius: 50%;
+            animation: sparkle 1.5s linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .bounce {
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            80% { transform: translateY(-5px); }
+        }
+
+        .emoji {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .time-hint {
+            background: linear-gradient(45deg, #ffd1dc, #ffe4e1);
+            border-radius: 15px;
+            padding: 12px 20px;
+            margin: 15px 0;
+            font-size: 16px;
+            color: #ff6b9d;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2);
+            border: 2px solid #ffb6c1;
+            animation: timeHintGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes timeHintGlow {
+            from { box-shadow: 0 4px 15px rgba(255, 107, 157, 0.2); }
+            to { box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4); }
+        }
+
+        #timeText {
+            background: linear-gradient(45deg, #ff6b9d, #ff8fab);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            text-shadow: none;
+        }
+    </style>
+</head>
+<body>
+            <div class="container">
+            <div class="emoji">🍽️</div>
+            <h1>今天吃什么？</h1>
+            
+            <div class="time-hint" id="timeHint">
+                <span id="timeText">该吃饭啦</span>
+            </div>
+            
+            <div class="result hidden" id="result">
+                今天要吃什么呢~~~
+            </div>
+            
+            <button class="generate-btn" onclick="generateFood()">
+              🐶不许吃小狗
+            </button>
+            
+            <div class="food-list">
+                可选美食：混沌、拌饭、大米套餐、灌汤包、饺子、麻辣烫、小火锅、鸡腿饭、鸭腿饭、冒烤鸭、口水鸡、倔强面、砂锅烩饼、羊肉烩面
+            </div>
+        </div>
+
+    <script>
+        const foods = [
+            '混沌 🥟',
+            '拌饭 🍚',
+            '大米套餐 🍱',
+            '灌汤包 🥟',
+            '饺子 🥟',
+            '麻辣烫 🌶️',
+            '小火锅 🍲',
+            '鸡腿饭 🍗',
+            '鸭腿饭 🦆',
+            '冒烤鸭 🦆',
+            '口水鸡 🐔',
+            '倔强面 🍜',
+            '砂锅烩饼 🍲',
+            '羊肉烩面 🍜'
+        ];
+
+        function generateFood() {
+            const result = document.getElementById('result');
+            const btn = document.querySelector('.generate-btn');
+            
+            // 添加按钮动画
+            btn.classList.add('bounce');
+            setTimeout(() => btn.classList.remove('bounce'), 600);
+            
+            // 隐藏结果
+            result.classList.add('hidden');
+            result.classList.remove('show');
+            
+            // 创建闪烁效果
+            createSparkles();
+            
+            setTimeout(() => {
+                // 随机选择食物
+                const randomFood = foods[Math.floor(Math.random() * foods.length)];
+                result.textContent = randomFood;
+                
+                // 显示结果
+                result.classList.remove('hidden');
+                result.classList.add('show');
+                result.classList.add('bounce');
+                
+                setTimeout(() => result.classList.remove('bounce'), 600);
+            }, 500);
+        }
+
+        function createSparkles() {
+            const container = document.querySelector('.container');
+            
+            for (let i = 0; i < 10; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 1.5 + 's';
+                
+                container.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 1500);
+            }
+        }
+
+        // 获取当前时间并更新提示
+        function updateTimeHint() {
+            const now = new Date();
+            const hour = now.getHours();
+            const timeText = document.getElementById('timeText');
+            
+            if (hour >= 6 && hour < 9) {
+                timeText.textContent = '小茂密早饭不在这里吃哦';
+            } else if (hour >= 9 && hour < 14) {
+                timeText.textContent = '小茂密该吃午饭啦';
+            } else {
+                timeText.textContent = '想想晚上吃什么吧，喵喵喵~';
+            }
+        }
+
+        // 页面加载时的动画
+        window.addEventListener('load', () => {
+            updateTimeHint();
+            const result = document.getElementById('result');
+            setTimeout(() => {
+                result.classList.remove('hidden');
+                result.classList.add('show');
+            }, 500);
+        });
+    </script>
+</body>
+</html>
